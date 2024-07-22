@@ -1,6 +1,20 @@
 # image-toolkit
 A image toolkit designed to convert the image file from any supported type to any supported type with only one line code.
 
+current supported file types:
+- .png
+- .jpg / .jpeg
+- .exr
+- .gif
+- .npy
+
+current supported runtime data types:
+- numpy.ndarray
+- torch.Tensor
+- cv2.Mat
+- PIL.Image.Image
+- matplotlib.pyplot.Figure
+
 ## Requirement
 ### Necessary packages
 - numpy
