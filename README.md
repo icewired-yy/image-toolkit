@@ -1,4 +1,4 @@
-# image-toolkit
+# FaYE-image
 A image toolkit designed to convert the image file from `any supported type` to `another one` with **only one line code**.
 
 current supported file types:
@@ -26,6 +26,11 @@ current supported runtime data types:
 - OpenEXR
 
 ## Usage
+**Installation**:
+```bash
+pip install faye-image
+```
+
 To achieve this easy and uniform image data IO operations, you only need to add:
 ```python
 from imageIO import *
