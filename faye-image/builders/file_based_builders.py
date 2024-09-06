@@ -1,13 +1,17 @@
 """
-    Copyright (c) 2024 YouYoung Icewired Du
+    Copyright 2024 YouYoung Icewired Du
 
-    The copyright of this code belongs to YouYoung Icewired Du. Any use of this code implies that you agree to abide by the terms in the accompanying LICENSE file.
-    Any use not explicitly authorized by the LICENSE is prohibited.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    If you have any questions or comments, please send an email to duyouyang957@gmail.com to contact us.
+        http://www.apache.org/licenses/LICENSE-2.0
 
-    This code is released under the Apache 2.0 License. The full text of the license can be found in the accompanying LICENSE file.
-    This code is provided "as is" without any express or implied warranties. Under no circumstances shall YouYoung Icewired Du be held liable for any claims, damages, or other liabilities arising from the use of this code.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
     --------------------------------------------------------------------------------------------------------------------
 
@@ -120,7 +124,7 @@ class EXRImageFileBuilder(ImageDataBuilder):
         elif image_channels == 4:
             channel_name_list = ['R', 'G', 'B', 'A']
         else:
-            raise ValueError(f"Unsupported channel number: {len(image_data)}")
+            raise ValueError(f"Unsupported channel number: {image_data.shape[1]}")
 
         if num_images == 1:
             image_data = image_data.squeeze(0)
@@ -144,7 +148,7 @@ class EXRImageFileBuilder(ImageDataBuilder):
             exr_file.close()
         else:
             for i in range(num_images):
-                image_data_i = image_data[i].squeeze(0)
+                image_data_i = image_data[i]
                 height, width = image_data_i.shape[-2], image_data_i.shape[-1]
                 header = OpenEXR.Header(width, height)
                 for channel_name in channel_name_list:
@@ -280,7 +284,7 @@ class PNGImageFileBuilder(ImageDataBuilder):
                 raise ValueError(f"Unsupported save mode: {save_mode}")
         else:
             for i in range(num_images):
-                image_data_i = image_data[i].squeeze(0)
+                image_data_i = image_data[i]
                 image_data_i = image_data_i.transpose(1, 2, 0)
                 image_data_i = image_data_i - np.min(image_data_i)
                 image_data_i = image_data_i / (np.max(image_data_i) + 1e-8)
@@ -378,7 +382,7 @@ class JPEGImageFileBuilder(ImageDataBuilder):
             image_data.save(save_path)
         else:
             for i in range(num_images):
-                image_data_i = image_data[i].squeeze(0)
+                image_data_i = image_data[i]
                 image_data_i = image_data_i.transpose(1, 2, 0)
                 image_data_i = image_data_i - np.min(image_data_i)
                 image_data_i = image_data_i / (np.max(image_data_i) + 1e-8)

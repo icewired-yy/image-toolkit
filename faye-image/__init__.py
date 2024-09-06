@@ -1,19 +1,33 @@
 """
-    Copyright (c) 2024 YouYoung Icewired Du
+    Copyright 2024 YouYoung Icewired Du
 
-    The copyright of this code belongs to YouYoung Icewired Du. Any use of this code implies that you agree to abide by the terms in the accompanying LICENSE file.
-    Any use not explicitly authorized by the LICENSE is prohibited.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    If you have any questions or comments, please send an email to duyouyang957@gmail.com to contact us.
+        http://www.apache.org/licenses/LICENSE-2.0
 
-    This code is released under the Apache 2.0 License. The full text of the license can be found in the accompanying LICENSE file.
-    This code is provided "as is" without any express or implied warranties. Under no circumstances shall YouYoung Icewired Du be held liable for any claims, damages, or other liabilities arising from the use of this code.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
     --------------------------------------------------------------------------------------------------------------------
 
-    IMAGE IO MODULE
+                                     ________  ________       ___    ___  _______
+                                    |\  _____\|\   __  \     |\  \  /  /||\  ___ \
+                                    \ \  \__/ \ \  \|\  \    \ \  \/  / /\ \   __/|
+                                     \ \   __\ \ \   __  \    \ \    / /  \ \  \_|/__
+                                      \ \  \_|  \ \  \ \  \    \/  /  /    \ \  \_|\ \
+                                       \ \__\    \ \__\ \__\ __/  / /       \ \_______\
+                                        \|__|     \|__|\|__||\___/ /         \|_______|
+                                                            \|___|/
 
-    This module is aiming at provide uniform interfaces for image data IO operations and format conversions.
+
+    FaYE (Fast Yet Easy) Image IO Toolkit
+
+    This toolkit is designed to provide uniform interfaces for image data IO operations and format conversions.
     With this module, the image information can be easily converted between different formats, such as numpy, torch, cv::Mat, PIL, etc.
     For the file formats, such as PNG, JPEG, GIF, EXR, etc., the module also provides the interfaces to read and write the image data.
     All the file types and runtime data types are unified.
@@ -51,7 +65,7 @@
 
     To achieve this easy and uniform image data IO operations, you only need to add:
         ```python
-            from imageIO import *
+            from faye-image import *
         ```
     at the beginning of your code.
 
@@ -71,6 +85,8 @@
         - BuildData(intermediate: ImageIntermediate, **kwargs) -> Build the data from the image intermediate.
             Since the 'B' maybe not 1, the batch dimension should be considered in the implementation.
             Returning a list of data is also supported.
+
+    Write for my dear, Faye.
 """
 
 from .builders import NUMPY, TORCH, CV_MAT, PIL_IMAGE, EXR_FILE, PNG_FILE, JPEG_FILE, GIF_FILE, NUMPY_FILE, PLT_FIG
