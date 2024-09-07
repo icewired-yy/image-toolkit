@@ -28,7 +28,7 @@ current supported runtime data types:
 ## Usage
 **Installation**:
 ```bash
-pip install faye_image
+pip install faye-image
 ```
 
 To achieve this easy and uniform image data IO operations, you only need to add:
