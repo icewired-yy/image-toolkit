@@ -115,7 +115,7 @@ class EXRImageFileBuilder(ImageDataBuilder):
         save_path = kwargs.get('save_path', None)
         if save_path is None:
             # Use the time stamp as the save name, and current path as the save path
-            save_path = os.path.join(".", "image_" + str(time.time()) + ".exr")
+            save_path = os.path.join("", "image_" + str(time.time()) + ".exr")
 
         if image_channels == 1:
             channel_name_list = ['Z']
@@ -237,7 +237,7 @@ class PNGImageFileBuilder(ImageDataBuilder):
         save_mode = kwargs.get('save_mode', None)
         if save_path is None:
             # Use the time stamp as the save name, and current path as the save path
-            save_path = os.path.join(".", "image_" + str(time.time()) + ".png")
+            save_path = os.path.join("", "image_" + str(time.time()) + ".png")
 
         # If the save mode is not provided, we will infer it from the image data
         if save_mode is None:
@@ -367,7 +367,7 @@ class JPEGImageFileBuilder(ImageDataBuilder):
         save_path = kwargs.get('save_path', None)
         if save_path is None:
             # Use the time stamp as the save name, and current path as the save path
-            save_path = os.path.join(".", "image_" + str(time.time()) + ".jpg")
+            save_path = os.path.join("", "image_" + str(time.time()) + ".jpg")
 
         if num_images == 1:
             image_data = image_data.squeeze(0)
@@ -452,7 +452,7 @@ class GIFImageFileBuilder(ImageDataBuilder):
         loop = kwargs.get('loop', 0)
         if save_path is None:
             # Use the time stamp as the save name, and current path as the save path
-            save_path = os.path.join(".", "image_" + str(time.time()) + ".gif")
+            save_path = os.path.join("", "image_" + str(time.time()) + ".gif")
 
         images = []
         for i in range(gif_data.shape[0]):
@@ -497,6 +497,6 @@ class NumpyFileBuilder(ImageDataBuilder):
         save_path = kwargs.get('save_path', None)
         if save_path is None:
             # Use the time stamp as the save name, and current path as the save path
-            save_path = os.path.join(".", "image_" + str(time.time()) + ".npy")
+            save_path = os.path.join("", "image_" + str(time.time()) + ".npy")
 
         np.save(save_path, image_data.squeeze(0).transpose(1, 2, 0))

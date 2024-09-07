@@ -28,12 +28,12 @@ current supported runtime data types:
 ## Usage
 **Installation**:
 ```bash
-pip install faye-image
+pip install faye_image
 ```
 
 To achieve this easy and uniform image data IO operations, you only need to add:
 ```python
-from imageIO import *
+from faye_image import *
 ```
 at the beginning of your code.
 

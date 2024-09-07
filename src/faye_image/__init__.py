@@ -65,7 +65,7 @@
 
     To achieve this easy and uniform image data IO operations, you only need to add:
         ```python
-            from faye-image import *
+            from faye_image import *
         ```
     at the beginning of your code.
 

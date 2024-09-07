@@ -3,8 +3,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "faye-image"
-version = "0.0.1"
+name = "faye_image"
+version = "0.1.1"
 dependencies = [
     "numpy",
 ]
