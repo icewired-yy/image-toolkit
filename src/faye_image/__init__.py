@@ -110,6 +110,10 @@ def From(data, data_type=None) -> ImageIntermediate:
     """
     Convert the data from the specified type to the image intermediate format.
 
+    Since the shape of torch.Tensor and numpy.ndarray are arbitrary, here we need to establish a corresponding principle:
+    1. The input numpy.ndarray can be [H x W] or [H x W x C].
+    2. The input torch.Tensor can be [H x W], [C x H x W] or [B x C x H x W].
+
     Args:
         data:       The data to be converted.
         data_type:  The type of the data.
@@ -131,6 +135,10 @@ def To(intermediate,
         For PNG_FILE, you can also specify the [save_mode], like 'I' or 'RGB'.
         For GIF_FILE, you can also specify the [duration] and [loop].
 
+    Since the shape of torch.Tensor and numpy.ndarray are arbitrary, here we need to establish a corresponding principle:
+    1. The output numpy.ndarray is [B x H x W x C].
+    2. The output torch.Tensor is [B x C x H x W].
+
     Args:
         intermediate:   The data in the image intermediate format.
         data_type:  The type of the data to be converted to.
@@ -149,10 +157,16 @@ def Convert(data, *, from_type, to_type, **kwargs):
     For PNG_FILE, you can also specify the [save_mode], like 'I' or 'RGB'.
     For GIF_FILE, you can also specify the [duration] and [loop].
 
+    Since the shape of torch.Tensor and numpy.ndarray are arbitrary, here we need to establish a corresponding principle:
+    1. The input numpy.ndarray can be [H x W] or [H x W x C].
+    2. The output numpy.ndarray is [B x H x W x C].
+    3. The input torch.Tensor can be [H x W], [C x H x W] or [B x C x H x W].
+    4. The output torch.Tensor is [B x C x H x W].
+
     Args:
         data:       The data to be converted.
         from_type:  The type of the data.
-        to_type:    The type of the data to be converted to.
+        to_type:    The type of the data to convert to.
 
     Returns:
         The data in the specified type.
