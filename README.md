@@ -78,7 +78,7 @@ The builder class should implement the following methods:
 - `CanBuild(data) -> bool`: Check if the builder can build the data.
 - `GetTag() -> str`: Get the tag of the builder.
 - `BuildIntermediate(data) -> ImageIntermediate`: Build the image intermediate from the data.
-    For current version, the image intermediate is a numpy array in `\[BxCxHxW\]` in `float32`.
+    For current version, the image intermediate is a numpy array in `[BxCxHxW]` in `float32`.
 - `BuildData(intermediate: ImageIntermediate, **kwargs)`: Build the data from the image intermediate.
     Since the `B` maybe not 1, the batch dimension should be considered in the implementation.
     Returning a list of data is also supported.
