@@ -235,6 +235,8 @@ class PILImageDataBuilder(ImageDataBuilder):
             data = data - np.min(data)
             data = data / (np.max(data) + 1e-8)
             data = data * 255
+            # If only one channel, then squeeze it
+            data = np.squeeze(data, axis=-1)
             return PIL.Image.fromarray(data.astype(np.uint8))
         else:
             data = intermediate.GetData().transpose(0, 2, 3, 1)
@@ -244,6 +246,7 @@ class PILImageDataBuilder(ImageDataBuilder):
                 image = image - np.min(image)
                 image = image / (np.max(image) + 1e-8)
                 image = image * 255
+                image = np.squeeze(image, axis=-1)
                 images.append(PIL.Image.fromarray(image.astype(np.uint8)))
             return images
 
