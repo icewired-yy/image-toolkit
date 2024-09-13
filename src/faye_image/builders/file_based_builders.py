@@ -70,7 +70,12 @@ class EXRImageFileBuilder(ImageDataBuilder):
 
     def BuildIntermediate(self, datapath) -> ImageIntermediate:
         if not self._prepared:
-            raise ImportError("The OpenEXR package is not installed. Please install OpenEXR to use the EXR_FILE.")
+            raise ImportError("""
+            The OpenEXR package is not installed. Please install OpenEXR to use the EXR_FILE.
+            
+            You can install OpenEXR by running the following command:
+            pip install OpenEXR
+            """)
 
         import OpenEXR
         import Imath
@@ -188,7 +193,12 @@ class PNGImageFileBuilder(ImageDataBuilder):
     def BuildIntermediate(self, datapath) -> ImageIntermediate:
         """ """
         if not self._prepared:
-            raise ImportError("The PIL package is not installed. Please install PIL to use the PNG_FILE.")
+            raise ImportError("""
+            The PIL package is not installed. Please install PIL to use the PNG_FILE.
+            
+            You can install PIL by running the following command:
+            pip install Pillow
+            """)
 
         import PIL.Image as Image
 
@@ -342,7 +352,12 @@ class JPEGImageFileBuilder(ImageDataBuilder):
     def BuildIntermediate(self, datapath) -> ImageIntermediate:
         """ Consider JPG only has 8 uint image. """
         if not self._prepared:
-            raise ImportError("The PIL package is not installed. Please install PIL to use the JPEG_FILE.")
+            raise ImportError("""
+            The PIL package is not installed. Please install PIL to use the JPEG_FILE.
+            
+            You can install PIL by running the following command:
+            pip install Pillow
+            """)
         import PIL.Image as Image
 
         image = Image.open(datapath)
@@ -418,7 +433,12 @@ class GIFImageFileBuilder(ImageDataBuilder):
     def BuildIntermediate(self, datapath) -> ImageIntermediate:
         """ Consider multi frames as batch. """
         if not self._prepared:
-            raise ImportError("The PIL package is not installed. Please install PIL to use the GIF_FILE.")
+            raise ImportError("""
+            The PIL package is not installed. Please install PIL to use the GIF_FILE.
+            
+            You can install PIL by running the following command:
+            pip install Pillow
+            """)
         import PIL.Image as Image
 
         gif = Image.open(datapath)

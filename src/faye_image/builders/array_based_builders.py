@@ -105,7 +105,15 @@ class TorchImageDataBuilder(ImageDataBuilder):
         """
         if not self._prepared:
             raise EnvironmentError(
-                "Torch is not installed. Please install torch to use the TorchImageDataBuilder")
+                """
+                Torch is not installed. Please install torch to use the TorchImageDataBuilder.
+                
+                You can install torch by running:
+                pip install torch
+                
+                Or go to the official website to find a proper version:
+                https://pytorch.org
+                """)
 
         if len(data.shape) == 2:
             data = data.unsqueeze(0)
@@ -156,7 +164,12 @@ class MATImageBuilder(ImageDataBuilder):
         """
         if not self._prepared:
             raise EnvironmentError(
-                "OpenCV is not installed. Please install OpenCV and torch to use the MATImageBuilder")
+                """
+                OpenCV is not installed. Please install OpenCV and torch to use the MATImageBuilder
+                
+                You can install OpenCV by running:
+                pip install opencv-python
+                """)
 
         if not isinstance(data, np.ndarray):
             data = np.array(data)
@@ -207,7 +220,12 @@ class PILImageDataBuilder(ImageDataBuilder):
         """
         if not self._prepared:
             raise EnvironmentError(
-                "PIL is not installed. Please install PIL and torch to use the PILImageDataBuilder")
+                """
+                PIL is not installed. Please install PIL and torch to use the PILImageDataBuilder
+                
+                You can install PIL by running:
+                pip install pillow
+                """)
 
         data = np.array(data)
         if len(data.shape) == 2:
@@ -278,7 +296,12 @@ class PLTFigDataBuilder(ImageDataBuilder):
         """
         if not self._prepared:
             raise EnvironmentError(
-                "Matplotlib is not installed. Please install Matplotlib and torch to use the PLTFigDataBuilder")
+                """
+                Matplotlib is not installed. Please install Matplotlib and torch to use the PLTFigDataBuilder
+                
+                You can install Matplotlib by running:
+                pip install matplotlib
+                """)
 
         # Get the canvas of the figure
         canvas = data.canvas
