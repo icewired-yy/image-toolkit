@@ -85,11 +85,21 @@ class EXRImageFileBuilder(ImageDataBuilder):
         dw = exr_file_header['dataWindow']
         channels = exr_file_header['channels']
 
+        num_channels = len(channels)
+        if num_channels == 1:
+            image_channels = ['Z']
+        elif num_channels == 3:
+            image_channels = ['R', 'G', 'B']
+        elif num_channels == 4:
+            image_channels = ['R', 'G', 'B', 'A']
+        else:
+            raise ValueError(f"Unsupported channel number: {num_channels}")
+
         size = (dw.max.x - dw.min.x + 1, dw.max.y - dw.min.y + 1)
         FLOAT = Imath.PixelType(Imath.PixelType.FLOAT)
 
         image_data_per_channel_list = []
-        for channel_name in channels:
+        for channel_name in image_channels:
             channel = exr_file.channel(channel_name, FLOAT)
             img_data = np.frombuffer(channel, dtype=np.float32)
             image_data_per_channel_list.append(img_data.reshape(size[1], size[0]).copy())

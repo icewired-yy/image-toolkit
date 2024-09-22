@@ -249,12 +249,13 @@ class PILImageDataBuilder(ImageDataBuilder):
         if intermediate.GetNumOfImages() == 1:
             # Get the value range of the intermediate data
             # If the value is not from 0 to 255, then normalize it to 0-255
-            data = intermediate.GetData().transpose(0, 2, 3, 1)
+            data = intermediate.GetData().transpose(0, 2, 3, 1).squeeze(0)
             data = data - np.min(data)
             data = data / (np.max(data) + 1e-8)
             data = data * 255
             # If only one channel, then squeeze it
-            data = np.squeeze(data, axis=-1)
+            if data.shape[-1] == 1:
+                data = np.squeeze(data, axis=-1)
             return PIL.Image.fromarray(data.astype(np.uint8))
         else:
             data = intermediate.GetData().transpose(0, 2, 3, 1)
@@ -264,7 +265,8 @@ class PILImageDataBuilder(ImageDataBuilder):
                 image = image - np.min(image)
                 image = image / (np.max(image) + 1e-8)
                 image = image * 255
-                image = np.squeeze(image, axis=-1)
+                if image.shape[-1] == 1:
+                    image = np.squeeze(image, axis=-1)
                 images.append(PIL.Image.fromarray(image.astype(np.uint8)))
             return images
 
