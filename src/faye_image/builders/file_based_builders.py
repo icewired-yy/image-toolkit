@@ -23,6 +23,7 @@
 import os
 import time
 import numpy as np
+from typing import Final
 from .builder_interface import ImageDataBuilder
 from ..image_intermediate import ImageIntermediate
 
@@ -30,11 +31,11 @@ from ..image_intermediate import ImageIntermediate
 """
     The tags for the image builders.
 """
-EXR_FILE = 'exr_file'
-PNG_FILE = 'png_file'
-JPEG_FILE = 'jpeg_file'
-GIF_FILE = 'gif_file'
-NUMPY_FILE = 'numpy_file'
+EXR_FILE: Final[str] = 'exr_file'
+PNG_FILE: Final[str] = 'png_file'
+JPEG_FILE: Final[str] = 'jpeg_file'
+GIF_FILE: Final[str] = 'gif_file'
+NUMPY_FILE: Final[str] = 'numpy_file'
 
 
 __all__ = [
@@ -218,28 +219,36 @@ class PNGImageFileBuilder(ImageDataBuilder):
         if image_mode == 'I':
             image_data = np.array(image)
             image_data = np.expand_dims(image_data, axis=0)
-            image_data = image_data / 65535.0
         elif image_mode == 'L':
             image_data = np.array(image)
             image_data = np.expand_dims(image_data, axis=0)
-            image_data = image_data / 255.0
         elif image_mode == 'RGB':
             image_data = np.array(image)
             image_data = image_data.transpose((2, 0, 1))
-            image_data = image_data / 255.0
         elif image_mode == 'RGBA':
-            image_data = np.array(image)[:, :, :3]
+            image_data = np.array(image)
             image_data = image_data.transpose((2, 0, 1))
-            image_data = image_data / 255.0
         elif image_mode == 'F':
             image_data = np.array(image)
             image_data = image_data.transpose((2, 0, 1))
         else:
             raise ValueError(f"Unsupported image mode: {image_mode}")
 
-        image_data = image_data.astype(np.float32)[np.newaxis, ...]
+        image_data = image_data[np.newaxis, ...]
 
         return ImageIntermediate(image_data)
+
+    @staticmethod
+    def _ImageDataCasting(img, max_val=255):
+        data_type = img.dtype
+        if data_type in [np.float32, np.float64, np.float16]:
+            img = np.clip(img, 0, 1)
+            img = img * max_val
+        elif data_type in [np.uint8, np.uint16, np.uint32, np.int32, np.int64]:
+            pass
+        else:
+            raise ValueError(f"Unsupported data type: {data_type}")
+        return img
 
     def BuildData(self, intermediate: ImageIntermediate, **kwargs):
         """
@@ -273,30 +282,28 @@ class PNGImageFileBuilder(ImageDataBuilder):
         if num_images == 1:
             image_data = image_data.squeeze(0)
             image_data = image_data.transpose(1, 2, 0)
-            image_data = image_data - np.min(image_data)
-            image_data = image_data / (np.max(image_data) + 1e-8)
 
             if save_mode == 'L':
-                image_data = image_data * 255
+                image_data = self._ImageDataCasting(image_data, 255)
                 image_data = image_data.astype(np.uint8)[..., 0]
                 image_data = Image.fromarray(image_data, mode='L')
                 image_data.save(save_path)
             elif save_mode == 'RGB':
-                image_data = image_data * 255
+                image_data = self._ImageDataCasting(image_data, 255)
                 image_data = image_data.astype(np.uint8)
                 if image_data.shape[-1] == 1:
                     image_data = np.concatenate([image_data, image_data, image_data], axis=-1)
                 image_data = Image.fromarray(image_data, mode='RGB')
                 image_data.save(save_path)
             elif save_mode == 'RGBA':
-                image_data = image_data * 255
+                image_data = self._ImageDataCasting(image_data, 255)
                 image_data = image_data.astype(np.uint8)
                 if image_data.shape[-1] == 1:
                     image_data = np.concatenate([image_data, image_data, image_data, image_data], axis=-1)
                 image_data = Image.fromarray(image_data, mode='RGBA')
                 image_data.save(save_path)
             elif save_mode == 'I':
-                image_data = image_data * 65535
+                image_data = self._ImageDataCasting(image_data, 65535)
                 image_data = image_data.astype(np.int32)[..., 0]
                 image_data = Image.fromarray(image_data, mode='I')
                 image_data.save(save_path)
@@ -306,30 +313,28 @@ class PNGImageFileBuilder(ImageDataBuilder):
             for i in range(num_images):
                 image_data_i = image_data[i]
                 image_data_i = image_data_i.transpose(1, 2, 0)
-                image_data_i = image_data_i - np.min(image_data_i)
-                image_data_i = image_data_i / (np.max(image_data_i) + 1e-8)
 
                 if save_mode == 'L':
-                    image_data_i = image_data_i * 255
+                    image_data = self._ImageDataCasting(image_data)
                     image_data_i = image_data_i.astype(np.uint8)[..., 0]
                     image_data_i = Image.fromarray(image_data_i, mode='L')
                     image_data_i.save(save_path.replace('.png', f'_{i}.png'))
                 elif save_mode == 'RGB':
-                    image_data_i = image_data_i * 255
+                    image_data = self._ImageDataCasting(image_data)
                     image_data_i = image_data_i.astype(np.uint8)
                     if image_data_i.shape[-1] == 1:
                         image_data_i = np.concatenate([image_data_i, image_data_i, image_data_i], axis=-1)
                     image_data_i = Image.fromarray(image_data_i, mode='RGB')
                     image_data_i.save(save_path.replace('.png', f'_{i}.png'))
                 elif save_mode == 'RGBA':
-                    image_data_i = image_data_i * 255
+                    image_data = self._ImageDataCasting(image_data)
                     image_data_i = image_data_i.astype(np.uint8)
                     if image_data_i.shape[-1] == 1:
                         image_data_i = np.concatenate([image_data_i, image_data_i, image_data_i, image_data_i], axis=-1)
                     image_data_i = Image.fromarray(image_data_i, mode='RGBA')
                     image_data_i.save(save_path.replace('.png', f'_{i}.png'))
                 elif save_mode == 'I':
-                    image_data_i = image_data_i * 65535
+                    image_data = self._ImageDataCasting(image_data, 65535)
                     image_data_i = image_data_i.astype(np.int32)[..., 0]
                     image_data_i = Image.fromarray(image_data_i, mode='I')
                     image_data_i.save(save_path.replace('.png', f'_{i}.png'))
@@ -373,9 +378,20 @@ class JPEGImageFileBuilder(ImageDataBuilder):
         image = Image.open(datapath)
         image_data = np.array(image)
         image_data = image_data.transpose((2, 0, 1))
-        image_data = image_data / 255.0
-        image_data = image_data.astype(np.float32)[np.newaxis, ...]
+        image_data = image_data[np.newaxis, ...]
         return ImageIntermediate(image_data)
+
+    @staticmethod
+    def _ImageDataCasting(img, max_val=255):
+        data_type = img.dtype
+        if data_type in [np.float32, np.float64, np.float16]:
+            img = np.clip(img, 0, 1)
+            img = img * max_val
+        elif data_type in [np.uint8, np.uint16, np.uint32, np.int32, np.int64]:
+            pass
+        else:
+            raise ValueError(f"Unsupported data type: {data_type}")
+        return img
 
     def BuildData(self, intermediate: ImageIntermediate, **kwargs):
         """
@@ -397,9 +413,7 @@ class JPEGImageFileBuilder(ImageDataBuilder):
         if num_images == 1:
             image_data = image_data.squeeze(0)
             image_data = image_data.transpose(1, 2, 0)
-            image_data = image_data - np.min(image_data)
-            image_data = image_data / (np.max(image_data) + 1e-8)
-            image_data = image_data * 255
+            image_data = self._ImageDataCasting(image_data)
             image_data = image_data.astype(np.uint8)
             if image_data.shape[-1] == 1:
                 image_data = np.concatenate([image_data, image_data, image_data], axis=-1)
@@ -409,9 +423,7 @@ class JPEGImageFileBuilder(ImageDataBuilder):
             for i in range(num_images):
                 image_data_i = image_data[i]
                 image_data_i = image_data_i.transpose(1, 2, 0)
-                image_data_i = image_data_i - np.min(image_data_i)
-                image_data_i = image_data_i / (np.max(image_data_i) + 1e-8)
-                image_data_i = image_data_i * 255
+                image_data = self._ImageDataCasting(image_data)
                 image_data_i = image_data_i.astype(np.uint8)
                 if image_data_i.shape[-1] == 1:
                     image_data_i = np.concatenate([image_data_i, image_data_i, image_data_i], axis=-1)
@@ -440,6 +452,18 @@ class GIFImageFileBuilder(ImageDataBuilder):
     def GetTag(self) -> str:
         return GIF_FILE
 
+    @staticmethod
+    def _ImageDataCasting(img, max_val=255):
+        data_type = img.dtype
+        if data_type in [np.float32, np.float64, np.float16]:
+            img = np.clip(img, 0, 1)
+            img = img * max_val
+        elif data_type in [np.uint8, np.uint16, np.uint32, np.int32, np.int64]:
+            pass
+        else:
+            raise ValueError(f"Unsupported data type: {data_type}")
+        return img
+
     def BuildIntermediate(self, datapath) -> ImageIntermediate:
         """ Consider multi frames as batch. """
         if not self._prepared:
@@ -459,7 +483,7 @@ class GIFImageFileBuilder(ImageDataBuilder):
         while True:
             try:
                 gif.seek(frame_count)
-                gif_frame = np.array(gif, dtype=np.float32) / 255.0
+                gif_frame = np.array(gif)
                 gif_frame = gif_frame.transpose((2, 0, 1))
                 gif_frames.append(gif_frame)
                 frame_count += 1
@@ -487,9 +511,7 @@ class GIFImageFileBuilder(ImageDataBuilder):
         images = []
         for i in range(gif_data.shape[0]):
             image = gif_data[i]
-            image = image - np.min(image)
-            image = image / np.max(image)
-            image = image * 255
+            image = self._ImageDataCasting(image)
             image = image.astype(np.uint8)
             if image.shape[-1] == 1:
                 image = np.concatenate([image, image, image], axis=-1)
@@ -519,7 +541,7 @@ class NumpyFileBuilder(ImageDataBuilder):
             image_data = np.expand_dims(image_data, axis=0)
         elif len(image_data.shape) == 3:
             image_data = image_data.transpose((2, 0, 1))
-        image_data = image_data.astype(np.float32)[np.newaxis, ...]
+        image_data = image_data[np.newaxis, ...]
         return ImageIntermediate(image_data)
 
     def BuildData(self, intermediate: ImageIntermediate, **kwargs):

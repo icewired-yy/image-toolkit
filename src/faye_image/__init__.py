@@ -89,21 +89,26 @@
     Write for my dear, Faye.
 """
 
-from .builders import NUMPY, TORCH, CV_MAT, PIL_IMAGE, EXR_FILE, PNG_FILE, JPEG_FILE, GIF_FILE, NUMPY_FILE, PLT_FIG
+from typing import Final
+from .builders import NUMPY_RT, TORCH_RT, CV_MAT_RT, PIL_IMAGE_RT, EXR_FILE, PNG_FILE, JPEG_FILE, GIF_FILE, NUMPY_FILE, PLT_FIG_RT
 from .image_factory import ImageFactory
 from .image_intermediate import ImageIntermediate
 from .builders import ImageDataBuilder
 
 
 __all__ = [
-    'NUMPY', 'TORCH', 'CV_MAT', 'PIL_IMAGE',
-    'EXR_FILE', 'PNG_FILE', 'JPEG_FILE', 'GIF_FILE', 'NUMPY_FILE', 'PLT_FIG',
+    'NUMPY_RT', 'TORCH_RT', 'CV_MAT_RT', 'PIL_IMAGE_RT',
+    'EXR_FILE', 'PNG_FILE', 'JPEG_FILE', 'GIF_FILE', 'NUMPY_FILE', 'PLT_FIG_RT',
     'From', 'To', 'Convert', 'RegisterBuilders',
     'ImageDataBuilder'
 ]
 
 
 _image_factory = ImageFactory()
+
+PNG_MODE_FLAG: Final[str] = "mode"
+GIF_DURATION_FLAG: Final[str] = "duration"
+GIF_LOOP_FLAG: Final[str] = "loop"
 
 
 def From(data, data_type=None) -> ImageIntermediate:
@@ -183,3 +188,31 @@ def RegisterBuilders(*new_builders):
         new_builders:   The new builders to be registered.
     """
     _image_factory.RegisteredBuilders(list(new_builders))
+
+
+class ImageCascade:
+    legal_flags = [PNG_MODE_FLAG, GIF_DURATION_FLAG, GIF_LOOP_FLAG]
+
+    def __init__(self,
+                 data: ImageIntermediate):
+        self.data = data
+        self.attr = dict()
+
+    def To(self, data_type):
+        return _image_factory.CreateData(self.data, data_type, **self.attr)
+
+    def Save(self, path, data_type):
+        self.attr['save_path'] = path
+        return _image_factory.CreateData(self.data, data_type, **self.attr)
+
+    def Set(self, value, flag):
+        self._CHECK_FLAG(flag)
+        self.attr[flag] = value
+        ...
+
+    def Resize(self):
+        ...
+
+    def _CHECK_FLAG(self, flag):
+        if flag not in self.legal_flags:
+            raise ValueError(f"Unsupported flag: {flag}")

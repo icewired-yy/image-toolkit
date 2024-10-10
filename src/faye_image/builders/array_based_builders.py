@@ -21,6 +21,7 @@
 
 
 import numpy as np
+from typing import Final
 from .builder_interface import ImageDataBuilder
 from ..image_intermediate import ImageIntermediate
 
@@ -28,19 +29,19 @@ from ..image_intermediate import ImageIntermediate
 """
     The tags for the image builders.
 """
-NUMPY = 'numpy'                 # B x H x W x C
-TORCH = 'torch'                 # B x C x H x W or C x H x W
-CV_MAT = 'cvMat'                # B x H x W x C
-PIL_IMAGE = 'PIL'               # PIL image or list of PIL images
-PLT_FIG = 'plt_fig'             # PLT fig or list of PLT figs
+NUMPY_RT: Final[str] = 'numpy'                 # B x H x W x C
+TORCH_RT: Final[str] = 'torch'                 # B x C x H x W or C x H x W
+CV_MAT_RT: Final[str] = 'cvMat'                # B x H x W x C
+PIL_IMAGE_RT: Final[str] = 'PIL'               # PIL image or list of PIL images
+PLT_FIG_RT: Final[str] = 'plt_fig'             # PLT fig or list of PLT figs
 
 
 __all__ = [
     'NumpyImageDataBuilder', 'TorchImageDataBuilder',
     'MATImageBuilder', 'PILImageDataBuilder',
     'PLTFigDataBuilder',
-    'NUMPY', 'TORCH', 'CV_MAT', 'PIL_IMAGE',
-    'PLT_FIG'
+    'NUMPY_RT', 'TORCH_RT', 'CV_MAT_RT', 'PIL_IMAGE_RT',
+    'PLT_FIG_RT'
 ]
 
 
@@ -49,23 +50,28 @@ class NumpyImageDataBuilder(ImageDataBuilder):
         return isinstance(data, np.ndarray)
 
     def GetTag(self) -> str:
-        return NUMPY
+        return NUMPY_RT
 
     def BuildIntermediate(self, data) -> ImageIntermediate:
         """
-            The input default shape Numpy image data should be [H W C] or [H W].
+            The input default shape Numpy image data should be [B,H,W,C], [H,W,C] or [H,W].
 
         :param data:   The numpy image data.
         :return:       The image intermediate.
         """
         # To B x C x H x W
-        if len(data.shape) == 2:
+        len_dimensions = len(data.shape)
+        if len_dimensions == 2:
             data = np.expand_dims(data, axis=-1)
             data = data.transpose((2, 0, 1))
             data = np.expand_dims(data, axis=0)
-        else:
+        elif len_dimensions == 3:
             data = data.transpose((2, 0, 1))
             data = np.expand_dims(data, axis=0)
+        elif len_dimensions == 4:
+            data = data.transpose((0, 3, 1, 2))
+        else:
+            raise ValueError(f"The shape of the input data {data.shape} is invalid.")
         return ImageIntermediate(data)
 
     def BuildData(self, intermediate: ImageIntermediate, **kwargs):
@@ -94,7 +100,7 @@ class TorchImageDataBuilder(ImageDataBuilder):
         return isinstance(data, torch.Tensor)
 
     def GetTag(self) -> str:
-        return TORCH
+        return TORCH_RT
 
     def BuildIntermediate(self, data) -> ImageIntermediate:
         """
@@ -124,7 +130,7 @@ class TorchImageDataBuilder(ImageDataBuilder):
 
     def BuildData(self, intermediate: ImageIntermediate, **kwargs):
         """
-            B x C x H x W -> list of [H x W x C] if B > 1, or [H x W x C] if B == 1.
+            B x C x H x W
 
         :param intermediate:   The image intermediate.
         :return:               The torch image data.
@@ -153,11 +159,11 @@ class MATImageBuilder(ImageDataBuilder):
         return isinstance(data, cv2.Mat)
 
     def GetTag(self) -> str:
-        return CV_MAT
+        return CV_MAT_RT
 
     def BuildIntermediate(self, data) -> ImageIntermediate:
         """
-            The input default shape CV image data should be [H W C].
+            The input default shape CV image data should be [H W C] or [H W].
 
         :param data:   The cv image data.
         :return:       The image intermediate.
@@ -209,11 +215,11 @@ class PILImageDataBuilder(ImageDataBuilder):
         return isinstance(data, PIL.Image.Image)
 
     def GetTag(self) -> str:
-        return PIL_IMAGE
+        return PIL_IMAGE_RT
 
     def BuildIntermediate(self, data) -> ImageIntermediate:
         """
-            The input default shape PIL image data should be [H W C].
+            The input default shape PIL image data should be [H W C] or [H W].
 
         :param data:   The PIL image data.
         :return:       The image intermediate.
@@ -250,9 +256,13 @@ class PILImageDataBuilder(ImageDataBuilder):
             # Get the value range of the intermediate data
             # If the value is not from 0 to 255, then normalize it to 0-255
             data = intermediate.GetData().transpose(0, 2, 3, 1).squeeze(0)
-            data = data - np.min(data)
-            data = data / (np.max(data) + 1e-8)
-            data = data * 255
+            if data.dtype in [np.float32, np.float64, np.float16]:
+                data = np.clip(data, 0, 1)
+                data = data * 255
+            elif data.dtype in [np.uint8, np.uint16, np.int32, np.int64, np.int16, np.int8]:
+                data = np.clip(data, 0, 255)
+            else:
+                raise ValueError(f"The data type {data.dtype} is not supported.")
             # If only one channel, then squeeze it
             if data.shape[-1] == 1:
                 data = np.squeeze(data, axis=-1)
@@ -262,9 +272,14 @@ class PILImageDataBuilder(ImageDataBuilder):
             images = []
             for i in range(data.shape[0]):
                 image = data[i]
-                image = image - np.min(image)
-                image = image / (np.max(image) + 1e-8)
-                image = image * 255
+                if image.dtype in [np.float32, np.float64, np.float16]:
+                    image = np.clip(image, 0, 1)
+                    image = image * 255
+                elif image.dtype in [np.uint8, np.uint16, np.int32, np.int64, np.int16, np.int8]:
+                    image = np.clip(image, 0, 255)
+                else:
+                    raise ValueError(f"The data type {image.dtype} is not supported.")
+
                 if image.shape[-1] == 1:
                     image = np.squeeze(image, axis=-1)
                 images.append(PIL.Image.fromarray(image.astype(np.uint8)))
@@ -287,7 +302,7 @@ class PLTFigDataBuilder(ImageDataBuilder):
         return isinstance(data, plt.Figure)
 
     def GetTag(self) -> str:
-        return PLT_FIG
+        return PLT_FIG_RT
 
     def BuildIntermediate(self, data) -> ImageIntermediate:
         """
