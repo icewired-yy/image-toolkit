@@ -89,11 +89,13 @@
     Write for my dear, Faye.
 """
 
+import numpy as np
 from typing import Final
 from .builders import NUMPY_RT, TORCH_RT, CV_MAT_RT, PIL_IMAGE_RT, EXR_FILE, PNG_FILE, JPEG_FILE, GIF_FILE, NUMPY_FILE, PLT_FIG_RT
 from .image_factory import ImageFactory
 from .image_intermediate import ImageIntermediate
 from .builders import ImageDataBuilder
+from .misc.image_resizing import NEAREST_INTER, LINEAR_INTER, CUBIC_INTER, resize_image
 
 
 __all__ = [
@@ -111,7 +113,7 @@ GIF_DURATION_FLAG: Final[str] = "duration"
 GIF_LOOP_FLAG: Final[str] = "loop"
 
 
-def From(data, data_type=None) -> ImageIntermediate:
+def From(data, data_type=None) -> 'ImageCascade':
     """
     Convert the data from the specified type to the image intermediate format.
 
@@ -124,13 +126,13 @@ def From(data, data_type=None) -> ImageIntermediate:
         data_type:  The type of the data.
 
     Returns:
-        The data in the image intermediate format.
+        The cascade object of the image intermediate format.
     """
     # Infer the data type if not specified
-    return _image_factory.CreateIntermediate(data, data_type)
+    return ImageCascade(_image_factory.CreateIntermediate(data, data_type))
 
 
-def To(intermediate,
+def To(cascade,
        data_type: str,
        **kwargs):
     """
@@ -145,13 +147,15 @@ def To(intermediate,
     2. The output torch.Tensor is [B x C x H x W].
 
     Args:
-        intermediate:   The data in the image intermediate format.
+        cascade:   The cascade style intermediate image type.
         data_type:  The type of the data to be converted to.
 
     Returns:
         The data in the specified type.
     """
-    return _image_factory.CreateData(intermediate, data_type, **kwargs)
+    for key, value in kwargs.items():
+        cascade.Set(value, key)
+    return cascade.To(data_type)
 
 
 def Convert(data, *, from_type, to_type, **kwargs):
@@ -203,15 +207,25 @@ class ImageCascade:
 
     def Save(self, path, data_type):
         self.attr['save_path'] = path
-        return _image_factory.CreateData(self.data, data_type, **self.attr)
+        _image_factory.CreateData(self.data, data_type, **self.attr)
+        return self
 
     def Set(self, value, flag):
         self._CHECK_FLAG(flag)
         self.attr[flag] = value
-        ...
+        return self
 
-    def Resize(self):
-        ...
+    def Resize(self, new_size_x, new_size_y=None, interpolation=LINEAR_INTER):
+        if new_size_y is None:
+            new_size_y = new_size_x
+        data = self.data.GetData()
+        NHWC_data = data.transpose((0, 2, 3, 1))
+        result_data = []
+        for i in range(data.shape[0]):
+            result_data.append(resize_image(NHWC_data[i], (new_size_x, new_size_y), interpolation))
+        result_data = np.stack(result_data, axis=0).transpose((0, 3, 1, 2))
+        self.data = ImageIntermediate(result_data)
+        return self
 
     def _CHECK_FLAG(self, flag):
         if flag not in self.legal_flags:

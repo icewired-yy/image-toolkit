@@ -1,1 +1,0 @@
-1. Fix the bug of rescaling the image data from numpy to [0, 1] indistinguishably, leading to a color bias of output image.

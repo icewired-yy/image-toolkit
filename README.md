@@ -15,6 +15,9 @@ current supported runtime data types:
 - PIL.Image.Image
 - matplotlib.pyplot.Figure
 
+## News
+- **2021.10.12**: [FaYE 0.2.0](update_record/v0.2.0.md) is released, bringing a totally new version of FaYE-image, with more operations and easier interfaces.
+
 ## Requirement
 ### Necessary packages
 - numpy
