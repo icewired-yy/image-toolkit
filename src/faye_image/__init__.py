@@ -89,7 +89,6 @@
     Write for my dear, Faye.
 """
 
-import numpy as np
 from typing import Final
 from .builders import NUMPY_RT, TORCH_RT, CV_MAT_RT, PIL_IMAGE_RT, EXR_FILE, PNG_FILE, JPEG_FILE, GIF_FILE, NUMPY_FILE, PLT_FIG_RT
 from .image_factory import ImageFactory
@@ -111,6 +110,7 @@ _image_factory = ImageFactory()
 PNG_MODE_FLAG: Final[str] = "mode"
 GIF_DURATION_FLAG: Final[str] = "duration"
 GIF_LOOP_FLAG: Final[str] = "loop"
+_SAVE_PATH_FLAG: Final[str] = "save_path"
 
 
 def From(data, data_type=None) -> 'ImageCascade':
@@ -195,7 +195,7 @@ def RegisterBuilders(*new_builders):
 
 
 class ImageCascade:
-    legal_flags = [PNG_MODE_FLAG, GIF_DURATION_FLAG, GIF_LOOP_FLAG]
+    legal_flags = [PNG_MODE_FLAG, GIF_DURATION_FLAG, GIF_LOOP_FLAG, _SAVE_PATH_FLAG]
 
     def __init__(self,
                  data: ImageIntermediate):
@@ -220,11 +220,15 @@ class ImageCascade:
             new_size_y = new_size_x
         data = self.data.GetData()
         NHWC_data = data.transpose((0, 2, 3, 1))
-        result_data = []
+        result_data = None
         for i in range(data.shape[0]):
-            result_data.append(resize_image(NHWC_data[i], (new_size_x, new_size_y), interpolation))
-        result_data = np.stack(result_data, axis=0).transpose((0, 3, 1, 2))
-        self.data = ImageIntermediate(result_data)
+            curr_image_data = resize_image(NHWC_data[i], (new_size_x, new_size_y), interpolation)
+            curr_int_image = _image_factory.CreateIntermediate(curr_image_data, NUMPY_RT)
+            if result_data is None:
+                result_data = curr_int_image
+            else:
+                result_data = result_data.Union(curr_int_image)
+        self.data = result_data
         return self
 
     def _CHECK_FLAG(self, flag):
