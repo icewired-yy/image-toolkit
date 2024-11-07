@@ -215,7 +215,7 @@ class ImageCascade:
         self.attr[flag] = value
         return self
 
-    def Resize(self, new_size_x, new_size_y=None, interpolation=LINEAR_INTER):
+    def Resize(self, new_size_x, new_size_y=None, *, interpolation=LINEAR_INTER):
         if new_size_y is None:
             new_size_y = new_size_x
         data = self.data.GetData()

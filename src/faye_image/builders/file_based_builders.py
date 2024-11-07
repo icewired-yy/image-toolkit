@@ -216,7 +216,7 @@ class PNGImageFileBuilder(ImageDataBuilder):
         image = Image.open(datapath)
         image_mode = image.mode
 
-        if image_mode == 'I':
+        if image_mode.startswith('I'):
             image_data = np.array(image)
             image_data = np.expand_dims(image_data, axis=0)
         elif image_mode == 'L':

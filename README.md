@@ -18,6 +18,8 @@ current supported runtime data types:
 ## News
 - **2024.10.12**: [FaYE 0.2.0](update_record/v0.2.0.md) is released, bringing a totally new version of FaYE-image, with more operations and easier interfaces.
 - **2024.10.14**: [FaYE 0.2.1](update_record/v0.2.1.md) is released, fixing the bug of unexpected image data shape management.
+- **2024.10.20**: [FaYE 0.2.2](update_record/v0.2.2.md) is released, fixing the bug of potential data type incompatibility during image resizing.
+- **2024.11.07**: [FaYE 0.3.0](update_record/v0.3.0.md) is released, introducing FaYE Visualizer, an interactive visualizer for any image formation algorithm.
 
 ## Requirement
 ### Necessary packages
